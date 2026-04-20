@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: Tabela wymiaru klientów
+
+    columns:
+      - name: customer_id
+        description: Klucz główny klienta
+        tests:
+          - unique
+          - not_null
+
+      - name: account_number
+        tests:
+          - not_null

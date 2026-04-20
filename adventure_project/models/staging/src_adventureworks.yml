@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: adventureworks
+    database: AdventureWorks2014
+    schema: Sales
+    tables:
+      - name: Customer

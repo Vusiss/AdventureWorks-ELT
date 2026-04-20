@@ -1,0 +1,1 @@
+dlt[mssql,sql-database]>=1.25.0

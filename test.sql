@@ -1,1 +1,1 @@
-select * from Person.Person 
+Select * from dbo.dim_customers
