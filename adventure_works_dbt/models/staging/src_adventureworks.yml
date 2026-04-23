@@ -1,8 +1,31 @@
 version: 2
 
 sources:
-  - name: adventureworks
-    database: AdventureWorks2014
-    schema: Sales
+  - name: extract
+    description: >
+      Tables loaded from MSSQL aw-db.Extract into aw-olap.duckdb (schema: extract)
+      by prepare_duckdb_extract.py.  Column names are DLT-normalised (snake_case).
+    schema: extract
     tables:
-      - name: Customer
+      - name: product
+        description: Production.Product — normalised by DLT
+      - name: product_subcategory
+        description: Production.ProductSubcategory — normalised by DLT
+      - name: product_category
+        description: Production.ProductCategory — normalised by DLT
+      - name: sales_person
+        description: Sales.SalesPerson — normalised by DLT
+      - name: sales_territory
+        description: Sales.SalesTerritory — normalised by DLT
+      - name: sales_order_header
+        description: Sales.SalesOrderHeader — normalised by DLT
+      - name: sales_order_detail
+        description: Sales.SalesOrderDetail — normalised by DLT
+      - name: person
+        description: Person.Person — normalised by DLT
+      - name: country_region
+        description: Person.CountryRegion — normalised by DLT
+      - name: product_rating
+        description: Product reviews from SBI2526-LAB-Rating-FixedDate.csv
+      - name: currency_rate_data
+        description: USD/PLN exchange rates from NBP API

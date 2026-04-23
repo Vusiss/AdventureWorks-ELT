@@ -1,0 +1,166 @@
+version: 2
+
+models:
+  - name: dim_product
+    description: >
+      Product dimension for the star schema. One row per product.
+      Includes category/subcategory hierarchy, pricing tiers, lifecycle status,
+      and aggregated customer ratings from the external CSV source.
+    columns:
+      - name: product_key
+        description: Surrogate key (= ProductID from AdventureWorks)
+        tests:
+          - unique
+          - not_null
+      - name: product_id
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        tests:
+          - not_null
+      - name: list_price
+        tests:
+          - not_null
+      - name: profit
+        tests:
+          - not_null
+      - name: margin_pct
+        tests:
+          - not_null
+      - name: active
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['ACTIVE', 'INACTIVE']
+      - name: discrete_price
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['LOW', 'MEDIUM', 'HIGH', 'VERY HIGH', 'N/A']
+      - name: sold_for_months
+        tests:
+          - not_null
+
+  - name: dim_salesperson
+    description: >
+      Salesperson dimension. One row per salesperson.
+      Full name enriched by joining Sales.SalesPerson with Person.Person.
+    columns:
+      - name: salesperson_key
+        description: Surrogate key (= BusinessEntityID)
+        tests:
+          - unique
+          - not_null
+      - name: salesperson_id
+        tests:
+          - unique
+          - not_null
+      - name: full_name
+        tests:
+          - not_null
+      - name: commission_pct
+        tests:
+          - not_null
+
+  - name: dim_territory
+    description: >
+      Sales territory dimension. One row per territory.
+      Country name joined from Person.CountryRegion.
+    columns:
+      - name: territory_key
+        description: Surrogate key (= TerritoryID)
+        tests:
+          - unique
+          - not_null
+      - name: territory_id
+        tests:
+          - unique
+          - not_null
+      - name: territory_name
+        tests:
+          - not_null
+      - name: country_name
+        tests:
+          - not_null
+      - name: territory_group
+        tests:
+          - not_null
+
+  - name: dim_date
+    description: >
+      Date dimension generated from a spine (2001-01-01 to 2026-12-31).
+      Covers the full AdventureWorks data range.
+    columns:
+      - name: date_key
+        description: Surrogate key in YYYYMMDD integer format
+        tests:
+          - unique
+          - not_null
+      - name: full_date
+        tests:
+          - unique
+          - not_null
+      - name: year
+        tests:
+          - not_null
+      - name: month
+        tests:
+          - not_null
+      - name: day_of_month
+        tests:
+          - not_null
+      - name: month_name
+        tests:
+          - not_null
+      - name: is_weekend
+        tests:
+          - not_null
+
+  - name: fact_sales
+    description: >
+      Sales fact table. Grain = one row per order line (SalesOrderDetail).
+      Only includes shipped orders (status = 5). Links to dim_product,
+      dim_salesperson, dim_territory, and dim_date.
+      Web orders (no salesperson) use salesperson_key = -1.
+    columns:
+      - name: sales_fact_key
+        description: Surrogate key (= SalesOrderDetailID)
+        tests:
+          - unique
+          - not_null
+      - name: order_date_key
+        description: FK to dim_date.date_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key
+      - name: product_key
+        description: FK to dim_product.product_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: product_key
+      - name: territory_key
+        description: FK to dim_territory.territory_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_territory')
+                field: territory_key
+      - name: order_qty
+        tests:
+          - not_null
+      - name: unit_price
+        tests:
+          - not_null
+      - name: line_total
+        tests:
+          - not_null

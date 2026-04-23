@@ -1,0 +1,123 @@
+version: 2
+
+models:
+  - name: stg_product
+    description: >
+      Cleaned and enriched product staging table. Joins Product, ProductSubcategory,
+      ProductCategory and ProductRating. Computes PROFIT, MARGIN, ACTIVE, SOLDFOR,
+      DISCRETEPRICE. Handles NULLs, standardises units (LB→KG, IN→CM) and flag codes
+      (product_line, class, style).
+    columns:
+      - name: product_id
+        description: Natural key (ProductID from AdventureWorks)
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        tests:
+          - not_null
+      - name: list_price
+        tests:
+          - not_null
+      - name: standard_cost
+        tests:
+          - not_null
+      - name: profit
+        description: list_price - standard_cost
+        tests:
+          - not_null
+      - name: margin
+        description: Profit as a percentage of list_price
+        tests:
+          - not_null
+      - name: active
+        description: ACTIVE if product is currently on sale, INACTIVE otherwise
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['ACTIVE', 'INACTIVE']
+      - name: sold_for
+        description: Months the product has been / was available for sale
+        tests:
+          - not_null
+      - name: discrete_price
+        description: Price bucket — LOW / MEDIUM / HIGH / VERY HIGH / N/A
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['LOW', 'MEDIUM', 'HIGH', 'VERY HIGH', 'N/A']
+      - name: color
+        tests:
+          - not_null
+      - name: weight_unit
+        tests:
+          - not_null
+      - name: size_unit
+        tests:
+          - not_null
+
+  - name: stg_salesperson
+    description: >
+      Cleaned salesperson staging table. Joins Sales.SalesPerson with Person.Person
+      to build full name and enrich with sales metrics.
+    columns:
+      - name: salesperson_id
+        description: Natural key (BusinessEntityID)
+        tests:
+          - unique
+          - not_null
+      - name: full_name
+        tests:
+          - not_null
+      - name: commission_pct
+        tests:
+          - not_null
+
+  - name: stg_territory
+    description: >
+      Cleaned territory staging table. Joins Sales.SalesTerritory with
+      Person.CountryRegion to get full country name.
+    columns:
+      - name: territory_id
+        description: Natural key
+        tests:
+          - unique
+          - not_null
+      - name: territory_name
+        tests:
+          - not_null
+      - name: country_name
+        tests:
+          - not_null
+      - name: territory_group
+        tests:
+          - not_null
+
+  - name: stg_sales_order
+    description: >
+      Cleaned order line staging table (SalesOrderDetail joined with SalesOrderHeader).
+      Filtered to shipped orders only (status = 5). Line_total recomputed from
+      qty * unit_price * (1 - discount) for consistency.
+    columns:
+      - name: sales_order_detail_id
+        description: Natural key
+        tests:
+          - unique
+          - not_null
+      - name: sales_order_id
+        tests:
+          - not_null
+      - name: order_date
+        tests:
+          - not_null
+      - name: product_id
+        tests:
+          - not_null
+      - name: order_qty
+        tests:
+          - not_null
+      - name: line_total
+        tests:
+          - not_null
