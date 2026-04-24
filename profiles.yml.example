@@ -1,4 +1,4 @@
-adventure_project:
+adventure_works_dbt:
   target: duckdb
   outputs:
     dev:

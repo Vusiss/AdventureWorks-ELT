@@ -19,13 +19,13 @@ AdventureWorks2014 (MSSQL)
 
 ### Schemat gwiazdy (aw-olap.main)
 
-| Tabela | Opis |
-|---|---|
-| `dim_product` | Wymiar produktu z PROFIT, MARGIN, ACTIVE, SOLDFOR, DISCRETEPRICE i ocenami |
+| Tabela              | Opis                                                                       |
+| ------------------- | -------------------------------------------------------------------------- |
+| `dim_product`     | Wymiar produktu z PROFIT, MARGIN, ACTIVE, SOLDFOR, DISCRETEPRICE i ocenami |
 | `dim_salesperson` | Wymiar sprzedawcy z pełnym imieniem i denormalizowanymi danymi terytorium |
-| `dim_territory` | Wymiar terytorium sprzedaży z pełną nazwą kraju |
-| `dim_date` | Wymiar daty z atrybutami dzień/tydzień/miesiąc/kwartał/półrocze/rok |
-| `fact_sales` | Tabela faktów sprzedaży (ziarno = linia zamówienia) z kwotą w PLN |
+| `dim_territory`   | Wymiar terytorium sprzedaży z pełną nazwą kraju                        |
+| `dim_date`        | Wymiar daty z atrybutami dzień/tydzień/miesiąc/kwartał/półrocze/rok  |
+| `fact_sales`      | Tabela faktów sprzedaży (ziarno = linia zamówienia) z kwotą w PLN      |
 
 ---
 
@@ -57,11 +57,11 @@ Pobierz i zainstaluj ze strony Microsoft:
 
 Na serwerze muszą istnieć trzy bazy danych:
 
-| Baza | Rola |
-|---|---|
-| `AdventureWorks2014` | Źródło danych (baza OLTP) |
-| `aw-db` | Obszar staging — DLT zapisuje tu surowe tabele |
-| `aw-olap` | Cel — dbt buduje tu schemat gwiazdy |
+| Baza                   | Rola                                            |
+| ---------------------- | ----------------------------------------------- |
+| `AdventureWorks2014` | Źródło danych (baza OLTP)                    |
+| `aw-db`              | Obszar staging — DLT zapisuje tu surowe tabele |
+| `aw-olap`            | Cel — dbt buduje tu schemat gwiazdy            |
 
 Bazy `aw-db` i `aw-olap` można utworzyć jednym skryptem:
 
@@ -144,7 +144,7 @@ cp profiles.yml.example ~/.dbt/profiles.yml
 Edytuj `~/.dbt/profiles.yml`:
 
 ```yaml
-adventure_project:
+adventure_works_dbt:
   target: mssql
   outputs:
     mssql:
@@ -174,6 +174,7 @@ python data_extract.py
 ```
 
 Skrypt wykonuje trzy operacje:
+
 1. Kopiuje tabele z `AdventureWorks2014` do `aw-db.extract` (DLT)
 2. Ładuje plik `SBI2526-LAB-Rating-FixedDate.csv` z ocenami produktów do `aw-db.extract`
 3. Pobiera historyczne kursy USD/PLN z API NBP (lata 2011–2014) i zapisuje je do `aw-db.extract`
@@ -212,6 +213,7 @@ dbt test
 ```
 
 Wykonuje 94 testy obejmujące:
+
 - unikalność i brak NULLi na wszystkich kluczach
 - poprawność wartości (`accepted_values`) dla `active`, `discrete_price`, `half_year`, `rate_change_direction`
 - integralność referencyjną (FK) między `fact_sales` a wszystkimi wymiarami
@@ -264,19 +266,25 @@ BI/
 ## Najczęstsze problemy
 
 ### `[08001] Named Pipes Provider: Could not open a connection`
+
 Serwer SQL jest nieosiągalny. Sprawdź adres, port (domyślnie 1433) i czy usługa SQL Server jest uruchomiona.
 
 ### `Login failed for user 'sa'`
+
 Nieprawidłowe hasło lub konto `sa` jest wyłączone. Upewnij się, że SQL Server jest w trybie uwierzytelniania mieszanego (SQL + Windows).
 
 ### `Catalog Error: Schema "extract" does not exist`
+
 Skrypt `data_extract.py` nie został uruchomiony przed `dbt run`, albo zakończył się błędem. Uruchom go ponownie i sprawdź logi.
 
 ### `dbt: command not found`
+
 dbt jest zainstalowany wewnątrz środowiska wirtualnego. Aktywuj je przed wywołaniem dbt:
+
 ```bash
 source .venv_/bin/activate
 ```
 
 ### Testy `not_null` na kursach walut
+
 Kursy NBP obejmują lata 2011–2014 zgodnie z zakresem dat w AdventureWorks2014. Jeśli baza źródłowa zawiera inny zakres dat zamówień, edytuj parametry `start_date`/`end_date` w funkcji `get_exchange_rates()` w pliku `exchange_rates.py`.

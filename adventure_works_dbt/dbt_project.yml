@@ -1,8 +1,8 @@
 
-name: 'adventure_project'
+name: 'adventure_works_dbt'
 version: '1.0.0'
 
-profile: 'adventure_project'
+profile: 'adventure_works_dbt'
 
 model-paths: ["models"]
 analysis-paths: ["analyses"]
@@ -22,7 +22,7 @@ clean-targets:
 #   4. dbt test                  <- validates completeness and correctness
 
 models:
-  adventure_project:
+  adventure_works_dbt:
     example:
       +enabled: false
     staging:
