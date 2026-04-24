@@ -12,7 +12,11 @@ WITH src_product AS (
         COALESCE(NULLIF(TRIM(color), ''), 'N/A')            AS color,
         COALESCE(standard_cost, 0.0)                        AS standard_cost,
         COALESCE(list_price, 0.0)                           AS list_price,
-        COALESCE(NULLIF(TRIM(size), ''), 'N/A')             AS size,
+        CASE
+            WHEN UPPER(TRIM(size_unit_measure_code)) = 'IN' AND NULLIF(TRIM(size), '') IS NOT NULL
+                THEN CAST(ROUND(CAST(TRIM(size) AS FLOAT) * 2.54, 2) AS VARCHAR(50))
+            ELSE COALESCE(NULLIF(TRIM(size), ''), 'N/A')
+        END                                                  AS size,
 
         -- Standardise size unit: convert inches to cm, unify label
         CASE
@@ -53,8 +57,8 @@ WITH src_product AS (
         END                                                  AS class,
 
         CASE UPPER(TRIM(style))
-            WHEN 'W' THEN 'Womens'
-            WHEN 'M' THEN 'Mens'
+            WHEN 'W' THEN 'Women'
+            WHEN 'M' THEN 'Men'
             WHEN 'U' THEN 'Universal'
             ELSE 'N/A'
         END                                                  AS style,

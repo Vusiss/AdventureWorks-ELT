@@ -16,9 +16,10 @@ clean-targets:
   - "dbt_packages"
 
 # Workflow:
-#   1. python prepare_duckdb_extract.py   <- copies aw-db.Extract to aw-olap.duckdb
-#   2. dbt run                            <- builds staging + star schema in aw-olap.duckdb
-#   3. dbt test                           <- validates completeness and correctness
+#   1. python data_extract.py    <- loads AdventureWorks2014 → aw-db.extract (DLT)
+#   2. python exchange_rates.py  <- loads NBP USD/PLN rates → aw-db.extract
+#   3. dbt run                   <- builds staging + star schema in aw-db
+#   4. dbt test                  <- validates completeness and correctness
 
 models:
   adventure_project:

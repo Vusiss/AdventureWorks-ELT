@@ -3,8 +3,8 @@ version: 2
 sources:
   - name: extract
     description: >
-      Tables loaded from MSSQL aw-db.Extract into aw-olap.duckdb (schema: extract)
-      by prepare_duckdb_extract.py.  Column names are DLT-normalised (snake_case).
+      Tables in aw-db.extract loaded by the DLT pipeline (data_extract.py).
+      Column names are DLT-normalised (snake_case).
     schema: extract
     tables:
       - name: product

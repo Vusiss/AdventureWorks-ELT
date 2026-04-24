@@ -30,35 +30,9 @@ rates_with_direction AS (
 
 all_dates AS (
     SELECT date_day FROM {{ ref('stg_date') }}
-),
-
--- Left-join: non-trading days get NULL rate, filled below via LOCF
-joined AS (
-    SELECT
-        d.date_day,
-        r.usd_pln_rate,
-        r.rate_change_direction
-    FROM all_dates                d
-    LEFT JOIN rates_with_direction r ON d.date_day = r.rate_date
 )
 
-{% if target.type == 'duckdb' %}
-
-SELECT
-    date_day,
-    ROUND(
-        LAST_VALUE(usd_pln_rate        IGNORE NULLS) OVER (
-            ORDER BY date_day ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-        4
-    )                                   AS usd_pln_rate,
-    LAST_VALUE(rate_change_direction IGNORE NULLS) OVER (
-        ORDER BY date_day ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
-                                        AS rate_change_direction
-FROM joined
-
-{% else %}
-
--- MSSQL: correlated subquery LOCF (exchange rate table is small, ~1 200 rows)
+-- MSSQL: correlated subquery LOCF (exchange rate table is small, ~900 rows)
 SELECT
     d.date_day,
     ROUND(
@@ -73,5 +47,3 @@ SELECT
      WHERE rwd.rate_date <= d.date_day
      ORDER BY rwd.rate_date DESC)       AS rate_change_direction
 FROM all_dates d
-
-{% endif %}
