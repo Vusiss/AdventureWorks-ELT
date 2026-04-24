@@ -5,6 +5,7 @@ sources:
     description: >
       Tables in aw-db.extract loaded by the DLT pipeline (data_extract.py).
       Column names are DLT-normalised (snake_case).
+    database: aw-db
     schema: extract
     tables:
       - name: product
