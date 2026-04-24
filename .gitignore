@@ -205,3 +205,5 @@ __marimo__/
 # macOS
 .DS_Store
 
+.claude/
+prepare_duckdb_extract.py

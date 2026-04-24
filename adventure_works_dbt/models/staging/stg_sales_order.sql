@@ -8,7 +8,7 @@ WITH src_header AS (
         CAST(due_date   AS DATE)        AS due_date,
         CAST(ship_date  AS DATE)        AS ship_date,
         status,
-        CAST(online_order_flag AS BOOLEAN)  AS online_order_flag,
+        {{ bool_cast('online_order_flag') }}    AS online_order_flag,
         customer_id,
         -- NULL sales_person_id means the order came in via the web (no salesperson)
         sales_person_id,

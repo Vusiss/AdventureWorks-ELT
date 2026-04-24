@@ -1,5 +1,5 @@
 adventure_project:
-  target: dev
+  target: duckdb
   outputs:
     dev:
       type: sqlserver
@@ -8,6 +8,23 @@ adventure_project:
       port: 1433
       database: AdventureWorks2014
       schema: dbo
+      user: sa
+      password: haslo
+      encrypt: false
+      trust_cert: true
+      threads: 4
+    duckdb:
+      type: duckdb
+      path: /home/yourpath
+      schema: main
+      threads: 4
+    mssql:
+      type: sqlserver
+      driver: "ODBC Driver 18 for SQL Server"
+      server: 127.0.0.1
+      port: 1433
+      database: aw-db
+      schema: main
       user: sa
       password: haslo
       encrypt: false

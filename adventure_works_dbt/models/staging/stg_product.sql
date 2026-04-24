@@ -5,8 +5,8 @@ WITH src_product AS (
         product_id,
         name                                        AS product_name,
         product_number,
-        CAST(make_flag AS BOOLEAN)                  AS make_flag,
-        CAST(finished_goods_flag AS BOOLEAN)        AS finished_goods_flag,
+        {{ bool_cast('make_flag') }}                AS make_flag,
+        {{ bool_cast('finished_goods_flag') }}      AS finished_goods_flag,
 
         -- Cleaning: replace NULL with descriptive defaults
         COALESCE(NULLIF(TRIM(color), ''), 'N/A')            AS color,
@@ -85,8 +85,8 @@ src_category AS (
 src_ratings AS (
     SELECT
         CAST(productid AS INTEGER)              AS product_id,
-        ROUND(AVG(CAST(rating_product AS DOUBLE)), 2)   AS avg_rating_product,
-        ROUND(AVG(CAST(rating_overall AS DOUBLE)), 2)   AS avg_rating_overall,
+        ROUND(AVG(CAST(rating_product AS FLOAT)), 2)    AS avg_rating_product,
+        ROUND(AVG(CAST(rating_overall AS FLOAT)), 2)    AS avg_rating_overall,
         COUNT(*)                                AS review_count
     FROM {{ source('extract', 'product_rating') }}
     WHERE productid IS NOT NULL
@@ -137,11 +137,7 @@ joined AS (
         -- Products with list_price = 0 are not for sale; mark as 0
         CASE
             WHEN p.list_price = 0 THEN 0
-            ELSE datediff(
-                'month',
-                p.sell_start_date,
-                COALESCE(p.sell_end_date, CAST(current_date AS DATE))
-            )
+            ELSE {{ datediff_months('p.sell_start_date', 'COALESCE(p.sell_end_date, ' ~ today() ~ ')') }}
         END                                              AS sold_for,
 
         -- Enrichment: DISCRETEPRICE — tiered price bucket
