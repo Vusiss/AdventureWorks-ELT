@@ -121,3 +121,39 @@ models:
       - name: line_total
         tests:
           - not_null
+
+  - name: stg_date
+    description: >
+      Date spine built from the actual sales date range (MIN to MAX order_date
+      from stg_sales_order). One row per calendar day. Used as the source for
+      dim_date and stg_exchange_rate.
+    columns:
+      - name: date_day
+        description: Calendar date
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_exchange_rate
+    description: >
+      USD/PLN exchange rates for every day in the sales date range.
+      Weekends and NBP holidays are filled via LOCF from the previous
+      trading day. rate_change_direction compares the published rate
+      with the previous published rate.
+    columns:
+      - name: date_day
+        description: Calendar date (one row per day in sales range)
+        tests:
+          - unique
+          - not_null
+      - name: usd_pln_rate
+        description: USD/PLN exchange rate (LOCF on non-trading days)
+        tests:
+          - not_null
+      - name: rate_change_direction
+        description: INCREASE / DECREASE / STABLE / UNKNOWN
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['INCREASE', 'DECREASE', 'STABLE', 'UNKNOWN']

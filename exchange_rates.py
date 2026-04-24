@@ -4,9 +4,11 @@ import requests
 from datetime import date, timedelta
 
 
-def get_exchange_rates(currency: str, days: int) -> pd.DataFrame:
-    end_date = date.today()
-    start_date = end_date - timedelta(days=days)
+def get_exchange_rates(
+    currency: str,
+    start_date: date = date(2011, 1, 1),
+    end_date: date = date(2014, 7, 1),
+) -> pd.DataFrame:
 
     chunk_size = 365
     records = []
@@ -40,9 +42,8 @@ def get_exchange_rates(currency: str, days: int) -> pd.DataFrame:
 
 def run_exchange_rate_pipeline():
     currency = "USD"
-    days = 365 * 5
 
-    df = get_exchange_rates(currency, days)
+    df = get_exchange_rates(currency)
     print(f"Fetched {len(df)} records for {currency}")
 
     pipeline = dlt.pipeline(

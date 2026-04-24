@@ -3,9 +3,9 @@ version: 2
 models:
   - name: dim_product
     description: >
-      Product dimension for the star schema. One row per product.
-      Includes category/subcategory hierarchy, pricing tiers, lifecycle status,
-      and aggregated customer ratings from the external CSV source.
+      Product dimension. One row per product. Includes category/subcategory
+      hierarchy, pricing tiers (DISCRETEPRICE), lifecycle status (ACTIVE/INACTIVE),
+      PROFIT, MARGIN, SOLDFOR, and aggregated customer ratings from the external CSV.
     columns:
       - name: product_key
         description: Surrogate key (= ProductID from AdventureWorks)
@@ -46,8 +46,9 @@ models:
 
   - name: dim_salesperson
     description: >
-      Salesperson dimension. One row per salesperson.
-      Full name enriched by joining Sales.SalesPerson with Person.Person.
+      Salesperson dimension. One row per salesperson. Full name from Person.Person.
+      Includes denormalised territory info (name, country, group) for direct analysis
+      without joining dim_territory.
     columns:
       - name: salesperson_key
         description: Surrogate key (= BusinessEntityID)
@@ -59,6 +60,15 @@ models:
           - unique
           - not_null
       - name: full_name
+        tests:
+          - not_null
+      - name: territory_name
+        tests:
+          - not_null
+      - name: country_name
+        tests:
+          - not_null
+      - name: territory_group
         tests:
           - not_null
       - name: commission_pct
@@ -91,8 +101,10 @@ models:
 
   - name: dim_date
     description: >
-      Date dimension generated from a spine (2001-01-01 to 2026-12-31).
-      Covers the full AdventureWorks data range.
+      Date dimension covering the actual sales date range (oldest to newest order).
+      Built from stg_date. Attributes: day, month (number + name), quarter,
+      half_year (1=H1 Jan-Jun, 2=H2 Jul-Dec), year, day_of_week, week_of_year,
+      is_weekend.
     columns:
       - name: date_key
         description: Surrogate key in YYYYMMDD integer format
@@ -106,13 +118,23 @@ models:
       - name: year
         tests:
           - not_null
+      - name: half_year
+        description: Semester — 1 (Jan-Jun) or 2 (Jul-Dec)
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2]
+      - name: quarter
+        tests:
+          - not_null
       - name: month
         tests:
           - not_null
-      - name: day_of_month
+      - name: month_name
         tests:
           - not_null
-      - name: month_name
+      - name: day_of_month
         tests:
           - not_null
       - name: is_weekend
@@ -122,8 +144,8 @@ models:
   - name: fact_sales
     description: >
       Sales fact table. Grain = one row per order line (SalesOrderDetail).
-      Only includes shipped orders (status = 5). Links to dim_product,
-      dim_salesperson, dim_territory, and dim_date.
+      Only shipped orders (status = 5). Includes PLN amount via NBP USD/PLN
+      exchange rate (LOCF for weekends/holidays) and rate direction flag.
       Web orders (no salesperson) use salesperson_key = -1.
     columns:
       - name: sales_fact_key
@@ -164,3 +186,18 @@ models:
       - name: line_total
         tests:
           - not_null
+      - name: line_total_pln
+        description: Line revenue in PLN (line_total × NBP USD/PLN rate on order date)
+        tests:
+          - not_null
+      - name: usd_pln_rate
+        description: NBP USD/PLN exchange rate used for PLN conversion
+        tests:
+          - not_null
+      - name: rate_change_direction
+        description: Whether the exchange rate rose or fell vs previous published rate
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['INCREASE', 'DECREASE', 'STABLE', 'UNKNOWN']
