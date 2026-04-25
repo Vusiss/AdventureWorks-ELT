@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 import dlt
 from dlt.sources.sql_database import sql_database
 from dlt.sources.filesystem import filesystem, read_csv

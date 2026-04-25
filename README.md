@@ -93,43 +93,34 @@ source .venv_/bin/activate        # Linux / macOS
 pip install -r requirements.txt
 ```
 
-### 3. Konfiguracja DLT — sekrety połączenia
+### 3. Konfiguracja zmiennych środowiskowych
 
 Skopiuj plik przykładowy i uzupełnij go danymi swojego serwera:
 
 ```bash
-cp .dlt/secrets.toml.example .dlt/secrets.toml
+cp .env.example .env
 ```
 
-Edytuj `.dlt/secrets.toml`:
+Edytuj `.env` — zmień `your_password` na swoje hasło oraz w razie potrzeby dostosuj host, port i nazwy baz:
 
-```toml
-# Połączenie źródłowe — AdventureWorks2014
-[sources.sql_database.credentials]
-drivername = "mssql+pyodbc"
-host       = "127.0.0.1"          # adres SQL Server
-port       = 1433
-database   = "AdventureWorks2014"
-username   = "sa"
-password   = "twoje_haslo"
+```env
+# Dane logowania są wspólne dla DLT i dbt — wystarczy wypełnić raz.
 
-[sources.sql_database.credentials.query]
-driver               = "ODBC Driver 18 for SQL Server"
-TrustServerCertificate = "yes"
+SOURCES__SQL_DATABASE__CREDENTIALS__HOST=127.0.0.1
+SOURCES__SQL_DATABASE__CREDENTIALS__PASSWORD=twoje_haslo
+# ... (pozostałe wartości w pliku .env.example)
 
-# Połączenie docelowe — aw-db (obszar staging dla DLT)
-[destination.mssql.credentials]
-host     = "127.0.0.1"
-port     = 1433
-database = "aw-db"
-username = "sa"
-password = "twoje_haslo"
-driver   = "ODBC Driver 18 for SQL Server"
-
-[destination.mssql.credentials.query]
-TrustServerCertificate = "yes"
-Encrypt                = "no"
+DBT_SERVER=127.0.0.1
+DBT_PASSWORD=twoje_haslo
+# ...
 ```
+
+Plik `.env` jest wymieniony w `.gitignore` — **nigdy nie zostanie zacommitowany**.
+
+> **Jak to działa:**
+> - DLT odczytuje zmienne `SOURCES__*` i `DESTINATION__*` automatycznie z otoczenia.
+> - dbt odczytuje zmienne `DBT_*` przez wywołania `env_var()` w `profiles.yml`.
+> - Skrypty Python ładują `.env` przez `python-dotenv` na starcie.
 
 ### 4. Konfiguracja dbt — profil połączenia
 
@@ -141,25 +132,7 @@ Skopiuj plik przykładowy:
 cp profiles.yml.example ~/.dbt/profiles.yml
 ```
 
-Edytuj `~/.dbt/profiles.yml`:
-
-```yaml
-adventure_works_dbt:
-  target: mssql
-  outputs:
-    mssql:
-      type: sqlserver
-      driver: "ODBC Driver 18 for SQL Server"
-      server: 127.0.0.1          # adres SQL Server
-      port: 1433
-      database: aw-olap          # baza docelowa dla schematu gwiazdy
-      schema: main
-      user: sa
-      password: twoje_haslo
-      encrypt: false
-      trust_cert: true
-      threads: 4
-```
+Profil korzysta ze zmiennych `DBT_*` zdefiniowanych w `.env` — nie musisz ręcznie edytować `profiles.yml`.
 
 ---
 
@@ -226,10 +199,13 @@ Oczekiwany wynik: `PASS=94 WARN=0 ERROR=0`.
 
 ```
 BI/
+├── .env                             # sekrety połączeń (NIE commitować — git-ignored)
+├── .env.example                     # szablon do skopiowania
+│
 ├── .dlt/
 │   ├── config.toml                  # konfiguracja runtime DLT
-│   ├── secrets.toml                 # sekrety połączeń (NIE commitować)
-│   └── secrets.toml.example         # szablon do skopiowania
+│   ├── secrets.toml                 # fallback TOML (git-ignored; .env ma pierwszeństwo)
+│   └── secrets.toml.example         # dokumentacja formatu TOML
 │
 ├── adventure_works_dbt/
 │   ├── dbt_project.yml              # konfiguracja projektu dbt
@@ -257,13 +233,22 @@ BI/
 ├── data_extract.py                  # potok DLT: AW2014 + CSV + kursy NBP → aw-db
 ├── exchange_rates.py                # moduł pobierania kursów USD/PLN z NBP
 ├── SBI2526-LAB-Rating-FixedDate.csv # oceny produktów (źródło zewnętrzne)
-├── profiles.yml.example             # szablon profilu dbt
+├── profiles.yml.example             # szablon profilu dbt (używa env_var())
 └── requirements.txt                 # zależności Python
 ```
 
 ---
 
 ## Najczęstsze problemy
+
+### `KeyError: 'DBT_PASSWORD'` lub brak połączenia po sklonowaniu
+
+Plik `.env` nie istnieje lub jest pusty. Wykonaj:
+
+```bash
+cp .env.example .env
+# następnie wypełnij .env swoim hasłem i adresem serwera
+```
 
 ### `[08001] Named Pipes Provider: Could not open a connection`
 
@@ -287,4 +272,4 @@ source .venv_/bin/activate
 
 ### Testy `not_null` na kursach walut
 
-Kursy NBP obejmują lata 2011–2014 zgodnie z zakresem dat w AdventureWorks2014. Jeśli baza źródłowa zawiera inny zakres dat zamówień, edytuj parametry `start_date`/`end_date` w funkcji `get_exchange_rates()` w pliku `exchange_rates.py`.
+Kursy NBP obejmują lata 2011–2014 zgodnie z zakresem dat w AdventureWorks2014. Jeśli baza źródłowa zawiera inny zakres dat zamówień, zmień zmienne `EXCHANGE_START_DATE` i `EXCHANGE_END_DATE` w pliku `.env`.

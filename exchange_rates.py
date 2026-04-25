@@ -1,3 +1,7 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 import dlt
 import pandas as pd
 import requests
@@ -5,10 +9,16 @@ from datetime import date, timedelta
 
 
 def get_exchange_rates(
-    currency: str,
-    start_date: date = date(2011, 1, 1),
-    end_date: date = date(2014, 7, 1),
+    currency: str | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
 ) -> pd.DataFrame:
+    if currency is None:
+        currency = os.getenv("EXCHANGE_CURRENCY", "USD")
+    if start_date is None:
+        start_date = date.fromisoformat(os.getenv("EXCHANGE_START_DATE", "2011-01-01"))
+    if end_date is None:
+        end_date = date.fromisoformat(os.getenv("EXCHANGE_END_DATE", "2014-07-01"))
 
     chunk_size = 365
     records = []
@@ -41,8 +51,7 @@ def get_exchange_rates(
 
 
 def run_exchange_rate_pipeline():
-    currency = "USD"
-
+    currency = os.getenv("EXCHANGE_CURRENCY", "USD")
     df = get_exchange_rates(currency)
     print(f"Fetched {len(df)} records for {currency}")
 

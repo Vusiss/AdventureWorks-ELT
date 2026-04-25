@@ -1,32 +1,15 @@
 adventure_works_dbt:
-  target: duckdb
+  target: mssql
   outputs:
-    dev:
-      type: sqlserver
-      driver: "ODBC Driver 18 for SQL Server"
-      server: 127.0.0.1
-      port: 1433
-      database: AdventureWorks2014
-      schema: dbo
-      user: sa
-      password: haslo
-      encrypt: false
-      trust_cert: true
-      threads: 4
-    duckdb:
-      type: duckdb
-      path: /home/yourpath
-      schema: main
-      threads: 4
     mssql:
       type: sqlserver
-      driver: "ODBC Driver 18 for SQL Server"
-      server: 127.0.0.1
-      port: 1433
-      database: aw-db
-      schema: main
-      user: sa
-      password: haslo
+      driver: "{{ env_var('DBT_DRIVER', 'ODBC Driver 18 for SQL Server') }}"
+      server: "{{ env_var('DBT_SERVER', '127.0.0.1') }}"
+      port: "{{ env_var('DBT_PORT', '1433') | int }}"
+      database: "{{ env_var('DBT_DATABASE', 'aw-olap') }}"
+      schema: "{{ env_var('DBT_SCHEMA', 'main') }}"
+      user: "{{ env_var('DBT_USER', 'sa') }}"
+      password: "{{ env_var('DBT_PASSWORD') }}"
       encrypt: false
       trust_cert: true
-      threads: 4
+      threads: "{{ env_var('DBT_THREADS', '4') | int }}"
