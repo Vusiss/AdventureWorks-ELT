@@ -7,10 +7,10 @@ from dlt.sources.filesystem import filesystem, read_csv
 from exchange_rates import run_exchange_rate_pipeline
 
 
-def run_csv_pipeline():
+def run_csv_pipeline(file_glob="SBI2526-LAB-Rating-FixedDate.csv"):
     csv_source = filesystem(
         bucket_url=".",
-        file_glob="SBI2526-LAB-Rating-FixedDate.csv"
+        file_glob=file_glob
     ) | read_csv()
 
     pipeline = dlt.pipeline(
