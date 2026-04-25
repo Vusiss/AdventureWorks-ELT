@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
+import os
 from pathlib import Path
 import subprocess
 
 from airflow.decorators import dag, task
 
-PROJECT_DIR = Path("/home/vusis/University/BI")
+PROJECT_DIR = Path(os.environ["PROJECT_DIR"])
 DBT_DIR = PROJECT_DIR / "adventure_works_dbt"
 VENV_PYTHON = str(PROJECT_DIR / ".venv_" / "bin" / "python")
 VENV_DBT = str(PROJECT_DIR / ".venv_" / "bin" / "dbt")
