@@ -80,7 +80,7 @@ Użytkownik bazy danych musi mieć uprawnienia `db_owner` (lub równoważne `CRE
 
 ```bash
 git clone <adres-repozytorium>
-cd BI
+cd AdventureWorks-ELT
 ```
 
 ### 2. Środowisko Python
@@ -145,7 +145,7 @@ Profil korzysta ze zmiennych `DBT_*` zdefiniowanych w `.env` — nie musisz ręc
 
 ## Uruchomienie potoku
 
-Wszystkie poniższe komendy wykonuj z głównego katalogu repozytorium (`BI/`) przy aktywnym środowisku wirtualnym.
+Wszystkie poniższe komendy wykonuj z głównego katalogu repozytorium (`AdventureWorks-ELT/`) przy aktywnym środowisku wirtualnym.
 
 ### Krok 1 — Ekstrakcja danych źródłowych i kursów walut
 
@@ -205,7 +205,7 @@ Oczekiwany wynik: `PASS=94 WARN=0 ERROR=0`.
 ## Struktura repozytorium
 
 ```
-BI/
+AdventureWorks-ELT/
 ├── .env                             # sekrety połączeń (NIE commitować — git-ignored)
 ├── .env.example                     # szablon do skopiowania
 │
