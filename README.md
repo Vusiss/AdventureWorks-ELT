@@ -115,9 +115,16 @@ DBT_PASSWORD=twoje_haslo
 # ...
 ```
 
+UWAGA! W przypadku błędu dlt najlepiej jest skopiować przykłądowy plik i uzupełnić go danymi. Rozwiązuje to większość problemów z odczytem danych przez dlt z .env.
+
+```
+cp .secrets.toml.example .secrets.toml
+```
+
 Plik `.env` jest wymieniony w `.gitignore` — **nigdy nie zostanie zacommitowany**.
 
 > **Jak to działa:**
+>
 > - DLT odczytuje zmienne `SOURCES__*` i `DESTINATION__*` automatycznie z otoczenia.
 > - dbt odczytuje zmienne `DBT_*` przez wywołania `env_var()` w `profiles.yml`.
 > - Skrypty Python ładują `.env` przez `python-dotenv` na starcie.
