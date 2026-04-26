@@ -43,6 +43,11 @@
     DATENAME(month, {{ col }})
 {% endmacro %}
 
+{# ── Month name (short, 3-char) ────────────────────────────────────── #}
+{% macro month_short(col) %}
+    LEFT(DATENAME(month, {{ col }}), 3)
+{% endmacro %}
+
 {# ── Day name (full) ───────────────────────────────────────────────── #}
 {% macro day_name(col) %}
     DATENAME(weekday, {{ col }})

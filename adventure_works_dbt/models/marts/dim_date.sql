@@ -17,6 +17,7 @@ SELECT
 
     CAST(MONTH(date_day) AS INTEGER)                        AS month,
     {{ month_name('date_day') }}                            AS month_name,
+    {{ month_short('date_day') }}                           AS month_short,
 
     CAST(DAY(date_day)   AS INTEGER)                        AS day_of_month,
     {{ day_name('date_day') }}                              AS day_name,
